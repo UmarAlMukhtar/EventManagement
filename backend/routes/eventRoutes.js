@@ -1,15 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { getEvents } = require("../models/Event");
+const {
+  createEvent,
+  getEvents,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+} = require("../controllers/eventController");
 
-// Get all events
-router.get("/", async (req, res) => {
-  try {
-    const events = await getEvents();
-    res.json(events);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/", createEvent);
+router.get("/", getEvents);
+router.get("/:id", getEventById);
+router.put("/:id", updateEvent);
+router.delete("/:id", deleteEvent);
 
 module.exports = router;

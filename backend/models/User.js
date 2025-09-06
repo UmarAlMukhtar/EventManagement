@@ -6,6 +6,10 @@ module.exports = {
       "INSERT INTO users (user_id, name, email, password, role) VALUES (?, ?, ?, ?, ?)";
     await pool.query(sql, [user_id, name, email, password, role]);
   },
+  async getUsers() {
+    const [rows] = await pool.query("SELECT * FROM users");
+    return rows;
+  },
   async getUserByEmail(email) {
     const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
       email,

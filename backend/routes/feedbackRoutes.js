@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { getFeedback } = require("../models/Feedback");
+const {
+  submitFeedback,
+  getFeedbackByReg,
+  getFeedbackByEvent,
+  getFeedbackByUser,
+} = require("../controllers/feedbackController");
 
-// Get all feedback
-router.get("/", async (req, res) => {
-  try {
-    const feedback = await getFeedback();
-    res.json(feedback);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/", submitFeedback);
+router.get("/registration/:reg_id", getFeedbackByReg);
+router.get("/event/:event_id", getFeedbackByEvent);
+router.get("/user/:user_id", getFeedbackByUser);
 
 module.exports = router;

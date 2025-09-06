@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { getAttendance } = require("../models/Attendance");
+const {
+  markAttendance,
+  getAttendanceByReg,
+  getAttendanceByUser,
+  updateAttendanceStatus,
+} = require("../controllers/attendanceController");
 
-// Get all attendance records
-router.get("/", async (req, res) => {
-  try {
-    const attendance = await getAttendance();
-    res.json(attendance);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/", markAttendance);
+router.get("/registration/:reg_id", getAttendanceByReg);
+router.get("/user/:user_id", getAttendanceByUser);
+router.put("/:att_id", updateAttendanceStatus);
 
 module.exports = router;

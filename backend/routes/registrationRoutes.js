@@ -1,15 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { getRegistrations } = require("../models/Registration");
+const {
+  createRegistration,
+  getRegistrationsByUser,
+  getRegistrationsByEvent,
+  updateRegistration,
+  deleteRegistration,
+} = require("../controllers/registrationController");
 
-// Get all registrations
-router.get("/", async (req, res) => {
-  try {
-    const registrations = await getRegistrations();
-    res.json(registrations);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/", createRegistration);
+router.get("/user/:user_id", getRegistrationsByUser);
+router.get("/event/:event_id", getRegistrationsByEvent);
+router.put("/:reg_id", updateRegistration);
+router.delete("/:reg_id", deleteRegistration);
 
 module.exports = router;
