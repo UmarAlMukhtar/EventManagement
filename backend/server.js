@@ -1,15 +1,21 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 require("dotenv").config();
-
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const registrationRoutes = require("./routes/registrationRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
-// const authRoutes = require("./routes/authRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 // Middleware
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Vite dev server default port
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Welcome route
@@ -31,7 +37,7 @@ app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/feedback", feedbackRoutes);
-// app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // Start server
 app.listen(3000, () => {

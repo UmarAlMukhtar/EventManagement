@@ -1,6 +1,0 @@
-node_modules/
-.env
-hashPassword.js
-authController.js
-authRoutes.js
-roleMiddleware.js
