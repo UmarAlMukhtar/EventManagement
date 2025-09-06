@@ -1,10 +1,40 @@
 const pool = require("./db").promise();
+const db = require("./db");
+
+// Function to generate next attendance ID in format a001, a002, etc.
+const generateNextAttId = async () => {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "SELECT att_id FROM attendance WHERE att_id LIKE 'a%' ORDER BY CAST(SUBSTRING(att_id, 2) AS UNSIGNED) DESC LIMIT 1",
+      [],
+      (err, results) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        let nextNumber = 1;
+        if (results.length > 0) {
+          const lastAttId = results[0].att_id;
+          const lastNumber = parseInt(lastAttId.substring(1));
+          nextNumber = lastNumber + 1;
+        }
+
+        // Format as a001, a002, etc.
+        const newAttId = `a${nextNumber.toString().padStart(3, "0")}`;
+        resolve(newAttId);
+      }
+    );
+  });
+};
 
 module.exports = {
-  async markAttendance({ att_id, status, reg_id }) {
+  async markAttendance({ status, reg_id }) {
+    const att_id = await generateNextAttId(); // Generate attendance ID in a001 format
     const sql =
       "INSERT INTO attendance (att_id, status, reg_id) VALUES (?, ?, ?)";
-    await pool.query(sql, [att_id, status, reg_id]);
+    const [result] = await pool.query(sql, [att_id, status, reg_id]);
+    return { att_id, ...result };
   },
   async getAttendanceByReg(reg_id) {
     const [rows] = await pool.query(

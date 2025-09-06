@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
-const NavBar = ({ isLoggedIn }) => {
+const NavBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { isLoggedIn, logout, isAdmin } = useAuth()
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -23,24 +25,7 @@ const NavBar = ({ isLoggedIn }) => {
           
           {/* Navigation Links */}
           <div className="hidden md:block">
-            <ul className="flex space-x-8">
-              <li>
-                <Link 
-                  to="/" 
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-gray-100"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/events" 
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-gray-100"
-                >
-                  Events
-                </Link>
-              </li>
-            </ul>
+            {/* Navigation links section - keeping empty for clean design */}
           </div>
           
           {/* Auth Links */}
@@ -52,6 +37,20 @@ const NavBar = ({ isLoggedIn }) => {
               >
                 Profile
               </Link>
+              {isAdmin() && (
+                <Link 
+                  to="/create-event" 
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                >
+                  Create Event
+                </Link>
+              )}
+              <button
+                onClick={logout}
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              >
+                Logout
+              </button>
             </div>
           ) : (
             <div className="hidden md:flex items-center space-x-4">
@@ -89,28 +88,34 @@ const NavBar = ({ isLoggedIn }) => {
       {isMobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
-            <Link 
-              to="/" 
-              className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/events" 
-              className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Events
-            </Link>
             {isLoggedIn ? (
-              <Link 
-                to="/profile" 
-                className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Profile
-              </Link>
+              <>
+                <Link 
+                  to="/profile" 
+                  className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                {isAdmin() && (
+                  <Link 
+                    to="/create-event" 
+                    className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Create Event
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout()
+                    setIsMobileMenuOpen(false)
+                  }}
+                  className="text-gray-700 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium text-left w-full"
+                >
+                  Logout
+                </button>
+              </>
             ) : (
               <>
                 <Link 

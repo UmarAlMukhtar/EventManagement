@@ -49,8 +49,31 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    await User.deleteUser(req.params.id);
-    res.json({ message: "User deleted." });
+    const userIdToDelete = req.params.id;
+    const requestingUserId = req.user.user_id;
+
+    // Users can only delete their own account, unless they're admin
+    if (userIdToDelete !== requestingUserId && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "You can only delete your own account" });
+    }
+
+    await User.deleteUser(userIdToDelete);
+    res.json({ message: "User deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.getUserById(req.user.user_id);
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    // Remove password from response
+    const { password, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

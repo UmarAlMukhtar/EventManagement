@@ -1,10 +1,40 @@
 const pool = require("./db").promise();
+const db = require("./db");
+
+// Function to generate next feedback ID in format f001, f002, etc.
+const generateNextFbId = async () => {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "SELECT fb_id FROM feedback WHERE fb_id LIKE 'f%' ORDER BY CAST(SUBSTRING(fb_id, 2) AS UNSIGNED) DESC LIMIT 1",
+      [],
+      (err, results) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        let nextNumber = 1;
+        if (results.length > 0) {
+          const lastFbId = results[0].fb_id;
+          const lastNumber = parseInt(lastFbId.substring(1));
+          nextNumber = lastNumber + 1;
+        }
+
+        // Format as f001, f002, etc.
+        const newFbId = `f${nextNumber.toString().padStart(3, "0")}`;
+        resolve(newFbId);
+      }
+    );
+  });
+};
 
 module.exports = {
-  async submitFeedback({ fb_id, reg_id, rating, comment }) {
+  async submitFeedback({ reg_id, rating, comment }) {
+    const fb_id = await generateNextFbId(); // Generate feedback ID in f001 format
     const sql =
       "INSERT INTO feedback (fb_id, reg_id, rating, comment) VALUES (?, ?, ?, ?)";
-    await pool.query(sql, [fb_id, reg_id, rating, comment]);
+    const [result] = await pool.query(sql, [fb_id, reg_id, rating, comment]);
+    return { fb_id, ...result };
   },
   async getFeedbackByReg(reg_id) {
     const [rows] = await pool.query("SELECT * FROM feedback WHERE reg_id = ?", [

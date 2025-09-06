@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
-const Login = ({ setIsLoggedIn }) => {
+const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -9,6 +10,7 @@ const Login = ({ setIsLoggedIn }) => {
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -65,9 +67,8 @@ const Login = ({ setIsLoggedIn }) => {
       const data = await response.json()
 
       if (response.ok) {
-        // Store token in localStorage
-        localStorage.setItem('token', data.token)
-        setIsLoggedIn(true)
+        // Store token and update auth state
+        login(data.token)
         navigate('/')
       } else {
         setErrors({ general: data.error || 'Login failed' })

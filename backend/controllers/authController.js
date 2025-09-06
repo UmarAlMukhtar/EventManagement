@@ -3,6 +3,33 @@ const db = require("../models/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+// Function to generate next user ID in format u001, u002, etc.
+const generateNextUserId = async () => {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "SELECT user_id FROM users WHERE user_id LIKE 'u%' ORDER BY CAST(SUBSTRING(user_id, 2) AS UNSIGNED) DESC LIMIT 1",
+      [],
+      (err, results) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        let nextNumber = 1;
+        if (results.length > 0) {
+          const lastUserId = results[0].user_id;
+          const lastNumber = parseInt(lastUserId.substring(1));
+          nextNumber = lastNumber + 1;
+        }
+
+        // Format as u001, u002, etc.
+        const newUserId = `u${nextNumber.toString().padStart(3, "0")}`;
+        resolve(newUserId);
+      }
+    );
+  });
+};
+
 const login = (req, res) => {
   if (!req.body.email) {
     return res.status(400).json({ error: "Email is required" });
@@ -52,15 +79,20 @@ const signup = (req, res) => {
 
       // Hash password and create user
       const hashedPassword = await bcrypt.hash(password, 10);
-      createUser(
-        { name, email, password: hashedPassword, role },
-        (err, results) => {
-          if (err) return res.status(500).json({ error: err.message });
-          res
-            .status(201)
-            .json({ message: "User created", userId: results.insertId });
-        }
-      );
+      const userId = await generateNextUserId(); // Generate user ID in u001 format
+
+      try {
+        await User.createUser({
+          user_id: userId,
+          name,
+          email,
+          password: hashedPassword,
+          role,
+        });
+        res.status(201).json({ message: "User created successfully" });
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
     }
   );
 };
