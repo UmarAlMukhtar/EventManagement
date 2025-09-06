@@ -1,24 +1,24 @@
 const pool = require("./db").promise();
 
 module.exports = {
-  async createUser({ user_id, name, email, password, role }) {
-    const sql =
-      "INSERT INTO users (user_id, name, email, password, role) VALUES (?, ?, ?, ?, ?)";
-    await pool.query(sql, [user_id, name, email, password, role]);
-  },
   async getUsers() {
     const [rows] = await pool.query("SELECT * FROM users");
-    return rows;
-  },
-  async getUserByEmail(email) {
-    const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
-      email,
-    ]);
     return rows;
   },
   async getUserById(user_id) {
     const [rows] = await pool.query("SELECT * FROM users WHERE user_id = ?", [
       user_id,
+    ]);
+    return rows;
+  },
+  async createUser({ user_id, name, email, password, role }) {
+    const sql =
+      "INSERT INTO users (user_id, name, email, password, role) VALUES (?, ?, ?, ?, ?)";
+    await pool.query(sql, [user_id, name, email, password, role]);
+  },
+  async getUserByEmail(email) {
+    const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
+      email,
     ]);
     return rows;
   },
