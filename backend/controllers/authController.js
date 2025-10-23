@@ -87,9 +87,15 @@ const login = async (req, res) => {
 const signup = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ error: "All fields are required" });
+    if (!name || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Name, email, and password are required" });
     }
+
+    // Only allow participant and coordinator roles - NEVER allow admin registration
+    const validRoles = ["participant", "coordinator"];
+    const userRole = role && validRoles.includes(role) ? role : "participant";
 
     // Use promise-based pool
     const pool = require("../models/db");
@@ -113,7 +119,7 @@ const signup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role,
+      role: userRole,
     });
 
     res

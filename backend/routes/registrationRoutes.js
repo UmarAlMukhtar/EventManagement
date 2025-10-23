@@ -24,7 +24,7 @@ router.get("/check/:event_id", checkRegistrationStatus);
 router.get("/user/:user_id", authorizeRoles("admin"), getRegistrationsByUser);
 router.get(
   "/event/:event_id",
-  authorizeRoles("admin"),
+  authorizeRoles("admin", "coordinator"),
   getRegistrationsByEvent
 );
 router.put("/:reg_id", authorizeRoles("admin"), updateRegistration);

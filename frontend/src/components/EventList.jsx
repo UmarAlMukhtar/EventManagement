@@ -10,7 +10,7 @@ const EventList = () => {
   const [error, setError] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [registrationStatus, setRegistrationStatus] = useState({})
-  const { isLoggedIn, isAdmin, getAuthHeaders } = useAuth()
+  const { isLoggedIn, isAdmin, user, getAuthHeaders } = useAuth()
 
   useEffect(() => {
     fetchEvents()
@@ -145,6 +145,15 @@ const EventList = () => {
     })
   }
 
+  const formatTime = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+  }
+
   const isUpcoming = (dateString) => {
     return new Date(dateString) >= new Date()
   }
@@ -207,8 +216,8 @@ const EventList = () => {
           <div className="w-24 h-1 bg-blue-600 mx-auto rounded mt-4"></div>
         </div>
 
-        {/* Create Event Button for Admins */}
-        {isLoggedIn && isAdmin() && (
+        {/* Create Event Button for Admins and Coordinators */}
+        {isLoggedIn && (isAdmin() || user?.role === 'coordinator') && (
           <div className="mb-8 text-center">
             <Link
               to="/create-event"
@@ -276,6 +285,9 @@ const EventList = () => {
                       </div>
                       <div className="text-sm text-gray-600">
                         {new Date(event.date).getFullYear()}
+                      </div>
+                      <div className="text-sm font-semibold text-blue-600 mt-2">
+                        {formatTime(event.date)}
                       </div>
                     </div>
                     

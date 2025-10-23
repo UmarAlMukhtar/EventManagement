@@ -24,11 +24,26 @@ const generateNextAttId = async () => {
 
 module.exports = {
   async markAttendance({ status, reg_id }) {
-    const att_id = await generateNextAttId(); // Generate attendance ID in a001 format
-    const sql =
-      "INSERT INTO attendance (att_id, status, reg_id) VALUES (?, ?, ?)";
-    const [result] = await pool.query(sql, [att_id, status, reg_id]);
-    return { att_id, ...result };
+    // Check if attendance already exists for this registration
+    const [existingRecords] = await pool.query(
+      "SELECT att_id FROM attendance WHERE reg_id = ?",
+      [reg_id]
+    );
+
+    if (existingRecords.length > 0) {
+      // Update existing attendance record
+      const att_id = existingRecords[0].att_id;
+      const sql = "UPDATE attendance SET status=?, updated_at=NOW() WHERE att_id=?";
+      await pool.query(sql, [status, att_id]);
+      return { att_id, updated: true };
+    } else {
+      // Create new attendance record
+      const att_id = await generateNextAttId();
+      const sql =
+        "INSERT INTO attendance (att_id, status, reg_id) VALUES (?, ?, ?)";
+      const [result] = await pool.query(sql, [att_id, status, reg_id]);
+      return { att_id, created: true, ...result };
+    }
   },
   async getAttendanceByReg(reg_id) {
     const [rows] = await pool.query(

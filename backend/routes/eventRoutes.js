@@ -11,11 +11,26 @@ const {
   getEventsByCoordinator,
 } = require("../controllers/eventController");
 
-router.post("/", authenticateToken, authorizeRoles("admin"), createEvent);
+router.post(
+  "/",
+  authenticateToken,
+  authorizeRoles("admin", "coordinator"),
+  createEvent
+);
 router.get("/coordinator/:coordinatorId", getEventsByCoordinator);
 router.get("/:id", getEventById);
-router.put("/:id", authenticateToken, authorizeRoles("admin"), updateEvent);
-router.delete("/:id", authenticateToken, authorizeRoles("admin"), deleteEvent);
+router.put(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("admin", "coordinator"),
+  updateEvent
+);
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("admin", "coordinator"),
+  deleteEvent
+);
 router.get("/", getEvents);
 
 module.exports = router;

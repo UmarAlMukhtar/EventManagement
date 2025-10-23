@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Calendar, MapPin, FileText, User } from 'lucide-react'
+import { Calendar, MapPin, FileText, User, Clock } from 'lucide-react'
 
 const CreateEvent = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     date: '',
+    time: '',
     venue: ''
   })
   const [errors, setErrors] = useState({})
@@ -15,8 +16,8 @@ const CreateEvent = () => {
   const navigate = useNavigate()
   const { getAuthHeaders, user, isAdmin } = useAuth()
 
-  // Redirect if not admin
-  if (!isAdmin()) {
+  // Redirect if not admin or coordinator
+  if (!isAdmin() && user?.role !== 'coordinator') {
     navigate('/')
     return null
   }
@@ -58,6 +59,10 @@ const CreateEvent = () => {
         newErrors.date = 'Event date cannot be in the past'
       }
     }
+
+    if (!formData.time) {
+      newErrors.time = 'Event start time is required'
+    }
     
     if (!formData.venue.trim()) {
       newErrors.venue = 'Event venue is required'
@@ -77,8 +82,14 @@ const CreateEvent = () => {
     setIsLoading(true)
     
     try {
+      // Combine date and time into a single datetime string
+      const dateTimeString = `${formData.date}T${formData.time}:00`
+      
       const eventData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        date: dateTimeString,
+        venue: formData.venue,
         coordinator_id: user?.user_id // Automatically set the current user as coordinator
       }
       
@@ -180,6 +191,27 @@ const CreateEvent = () => {
               />
               {errors.date && (
                 <p className="mt-1 text-sm text-red-600">{errors.date}</p>
+              )}
+            </div>
+
+            {/* Event Start Time */}
+            <div>
+              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
+                <Clock className="inline h-4 w-4 mr-1" />
+                Event Start Time
+              </label>
+              <input
+                type="time"
+                id="time"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.time ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.time && (
+                <p className="mt-1 text-sm text-red-600">{errors.time}</p>
               )}
             </div>
 

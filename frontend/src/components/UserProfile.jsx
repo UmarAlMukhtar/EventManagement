@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { User, Calendar, MapPin, Clock, Users, Award, Mail, CreditCard, Trash2 } from 'lucide-react'
+import AttendanceModal from './AttendanceModal'
 
 const UserProfile = () => {
   const [userDetails, setUserDetails] = useState(null)
@@ -11,6 +12,7 @@ const UserProfile = () => {
   const [error, setError] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [selectedEventForAttendance, setSelectedEventForAttendance] = useState(null)
   const { getAuthHeaders, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -28,8 +30,8 @@ const UserProfile = () => {
           const userData = await userResponse.json()
           setUserDetails(userData)
           
-          // Fetch coordinated events if user is admin
-          if (userData.role === 'admin') {
+          // Fetch coordinated events if user is admin or coordinator
+          if (userData.role === 'admin' || userData.role === 'coordinator') {
             const coordinatedResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/events/coordinator/${userData.user_id}`, {
               headers: getAuthHeaders()
             })
@@ -207,8 +209,8 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* Coordinated Events - Only show for admins */}
-        {userDetails?.role === 'admin' && (
+        {/* Coordinated Events - Only show for admins and coordinators */}
+        {(userDetails?.role === 'admin' || userDetails?.role === 'coordinator') && (
           <div className="bg-white shadow rounded-lg mb-8">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
@@ -222,7 +224,11 @@ const UserProfile = () => {
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {coordinatedEvents.map((event) => (
-                    <div key={event.event_id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <button
+                      key={event.event_id}
+                      onClick={() => setSelectedEventForAttendance(event)}
+                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow hover:border-blue-300 text-left"
+                    >
                       <h3 className="font-semibold text-gray-900 mb-2">{event.title}</h3>
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2">{event.description}</p>
                       <div className="space-y-2 text-sm text-gray-500">
@@ -235,7 +241,10 @@ const UserProfile = () => {
                           <span>{event.venue}</span>
                         </div>
                       </div>
-                    </div>
+                      <div className="mt-3 text-xs text-blue-600 font-medium">
+                        Click to mark attendance
+                      </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -277,7 +286,7 @@ const UserProfile = () => {
                       </div>
                       <div className="flex items-center">
                         <Clock className="h-4 w-4 mr-2" />
-                        <span>Registered: {formatDate(registration.registration_date)}</span>
+                        <span>Registered: {formatDate(registration.reg_date)}</span>
                       </div>
                     </div>
                   </div>
@@ -287,6 +296,20 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+      
+      {/* Attendance Modal */}
+      {selectedEventForAttendance && (
+        <AttendanceModal
+          event={selectedEventForAttendance}
+          onClose={(refreshed) => {
+            setSelectedEventForAttendance(null)
+            // Optionally refresh data if attendance was saved
+            if (refreshed) {
+              // Could refetch coordinated events here if needed
+            }
+          }}
+        />
+      )}
       
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (

@@ -8,7 +8,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'user'
+    role: 'participant'
   })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
@@ -198,8 +198,9 @@ const Register = () => {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="user">Regular User</option>
-                <option value="admin">Event Coordinator</option>
+                <option value="">Select a role</option>
+                <option value="participant">Participant</option>
+                <option value="coordinator">Coordinator</option>
               </select>
               {errors.role && (
                 <p className="mt-1 text-sm text-red-600">{errors.role}</p>
