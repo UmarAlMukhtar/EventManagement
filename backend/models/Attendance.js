@@ -33,7 +33,8 @@ module.exports = {
     if (existingRecords.length > 0) {
       // Update existing attendance record
       const att_id = existingRecords[0].att_id;
-      const sql = "UPDATE attendance SET status=?, updated_at=NOW() WHERE att_id=?";
+      const sql =
+        "UPDATE attendance SET status=?, updated_at=NOW() WHERE att_id=?";
       await pool.query(sql, [status, att_id]);
       return { att_id, updated: true };
     } else {
