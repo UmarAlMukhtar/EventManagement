@@ -1,31 +1,25 @@
-const pool = require("./db").promise();
-const db = require("./db");
+const pool = require("./db");
 
 // Function to generate next registration ID in format r001, r002, etc.
 const generateNextRegId = async () => {
-  return new Promise((resolve, reject) => {
-    db.query(
-      "SELECT reg_id FROM registrations WHERE reg_id LIKE 'r%' ORDER BY CAST(SUBSTRING(reg_id, 2) AS UNSIGNED) DESC LIMIT 1",
-      [],
-      (err, results) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        let nextNumber = 1;
-        if (results.length > 0) {
-          const lastRegId = results[0].reg_id;
-          const lastNumber = parseInt(lastRegId.substring(1));
-          nextNumber = lastNumber + 1;
-        }
-
-        // Format as r001, r002, etc.
-        const newRegId = `r${nextNumber.toString().padStart(3, "0")}`;
-        resolve(newRegId);
-      }
+  try {
+    const [results] = await pool.query(
+      "SELECT reg_id FROM registrations WHERE reg_id LIKE 'r%' ORDER BY CAST(SUBSTRING(reg_id, 2) AS UNSIGNED) DESC LIMIT 1"
     );
-  });
+
+    let nextNumber = 1;
+    if (results.length > 0) {
+      const lastRegId = results[0].reg_id;
+      const lastNumber = parseInt(lastRegId.substring(1));
+      nextNumber = lastNumber + 1;
+    }
+
+    // Format as r001, r002, etc.
+    const newRegId = `r${nextNumber.toString().padStart(3, "0")}`;
+    return newRegId;
+  } catch (err) {
+    throw new Error(`Failed to generate registration ID: ${err.message}`);
+  }
 };
 
 module.exports = {

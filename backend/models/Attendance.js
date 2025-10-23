@@ -1,31 +1,25 @@
-const pool = require("./db").promise();
-const db = require("./db");
+const pool = require("./db");
 
 // Function to generate next attendance ID in format a001, a002, etc.
 const generateNextAttId = async () => {
-  return new Promise((resolve, reject) => {
-    db.query(
-      "SELECT att_id FROM attendance WHERE att_id LIKE 'a%' ORDER BY CAST(SUBSTRING(att_id, 2) AS UNSIGNED) DESC LIMIT 1",
-      [],
-      (err, results) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        let nextNumber = 1;
-        if (results.length > 0) {
-          const lastAttId = results[0].att_id;
-          const lastNumber = parseInt(lastAttId.substring(1));
-          nextNumber = lastNumber + 1;
-        }
-
-        // Format as a001, a002, etc.
-        const newAttId = `a${nextNumber.toString().padStart(3, "0")}`;
-        resolve(newAttId);
-      }
+  try {
+    const [results] = await pool.query(
+      "SELECT att_id FROM attendance WHERE att_id LIKE 'a%' ORDER BY CAST(SUBSTRING(att_id, 2) AS UNSIGNED) DESC LIMIT 1"
     );
-  });
+
+    let nextNumber = 1;
+    if (results.length > 0) {
+      const lastAttId = results[0].att_id;
+      const lastNumber = parseInt(lastAttId.substring(1));
+      nextNumber = lastNumber + 1;
+    }
+
+    // Format as a001, a002, etc.
+    const newAttId = `a${nextNumber.toString().padStart(3, "0")}`;
+    return newAttId;
+  } catch (err) {
+    throw new Error(`Failed to generate attendance ID: ${err.message}`);
+  }
 };
 
 module.exports = {

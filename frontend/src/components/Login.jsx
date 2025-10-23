@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    emailOrUsername: '',
     password: ''
   })
   const [errors, setErrors] = useState({})
@@ -30,10 +30,8 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {}
     
-    if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
+    if (!formData.emailOrUsername) {
+      newErrors.emailOrUsername = 'Email or username is required'
     }
     
     if (!formData.password) {
@@ -46,6 +44,10 @@ const Login = () => {
     return Object.keys(newErrors).length === 0
   }
 
+  const isEmail = (str) => {
+    return /\S+@\S+\.\S+/.test(str)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
@@ -56,12 +58,23 @@ const Login = () => {
     setIsLoading(true)
     
     try {
+      // Build request body with email or username
+      const requestBody = {
+        password: formData.password
+      }
+      
+      if (isEmail(formData.emailOrUsername)) {
+        requestBody.email = formData.emailOrUsername
+      } else {
+        requestBody.username = formData.emailOrUsername
+      }
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
@@ -101,23 +114,23 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
+              <label htmlFor="emailOrUsername" className="sr-only">
+                Email or username
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="emailOrUsername"
+                name="emailOrUsername"
+                type="text"
+                autoComplete="username"
                 className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
+                  errors.emailOrUsername ? 'border-red-300' : 'border-gray-300'
                 } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Email address"
-                value={formData.email}
+                placeholder="Email or username"
+                value={formData.emailOrUsername}
                 onChange={handleChange}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              {errors.emailOrUsername && (
+                <p className="mt-1 text-sm text-red-600">{errors.emailOrUsername}</p>
               )}
             </div>
             <div>

@@ -1,31 +1,25 @@
-const pool = require("./db").promise();
-const db = require("./db");
+const pool = require("./db");
 
 // Function to generate next feedback ID in format f001, f002, etc.
 const generateNextFbId = async () => {
-  return new Promise((resolve, reject) => {
-    db.query(
-      "SELECT fb_id FROM feedback WHERE fb_id LIKE 'f%' ORDER BY CAST(SUBSTRING(fb_id, 2) AS UNSIGNED) DESC LIMIT 1",
-      [],
-      (err, results) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        let nextNumber = 1;
-        if (results.length > 0) {
-          const lastFbId = results[0].fb_id;
-          const lastNumber = parseInt(lastFbId.substring(1));
-          nextNumber = lastNumber + 1;
-        }
-
-        // Format as f001, f002, etc.
-        const newFbId = `f${nextNumber.toString().padStart(3, "0")}`;
-        resolve(newFbId);
-      }
+  try {
+    const [results] = await pool.query(
+      "SELECT fb_id FROM feedback WHERE fb_id LIKE 'f%' ORDER BY CAST(SUBSTRING(fb_id, 2) AS UNSIGNED) DESC LIMIT 1"
     );
-  });
+
+    let nextNumber = 1;
+    if (results.length > 0) {
+      const lastFbId = results[0].fb_id;
+      const lastNumber = parseInt(lastFbId.substring(1));
+      nextNumber = lastNumber + 1;
+    }
+
+    // Format as f001, f002, etc.
+    const newFbId = `f${nextNumber.toString().padStart(3, "0")}`;
+    return newFbId;
+  } catch (err) {
+    throw new Error(`Failed to generate feedback ID: ${err.message}`);
+  }
 };
 
 module.exports = {

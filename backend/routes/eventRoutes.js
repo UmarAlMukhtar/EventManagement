@@ -12,10 +12,10 @@ const {
 } = require("../controllers/eventController");
 
 router.post("/", authenticateToken, authorizeRoles("admin"), createEvent);
-router.get("/", getEvents);
-router.get("/:id", getEventById);
 router.get("/coordinator/:coordinatorId", getEventsByCoordinator);
+router.get("/:id", getEventById);
 router.put("/:id", authenticateToken, authorizeRoles("admin"), updateEvent);
 router.delete("/:id", authenticateToken, authorizeRoles("admin"), deleteEvent);
+router.get("/", getEvents);
 
 module.exports = router;

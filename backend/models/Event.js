@@ -1,31 +1,25 @@
-const pool = require("./db").promise();
-const db = require("./db");
+const pool = require("./db");
 
 // Function to generate next event ID in format e001, e002, etc.
 const generateNextEventId = async () => {
-  return new Promise((resolve, reject) => {
-    db.query(
-      "SELECT event_id FROM events WHERE event_id LIKE 'e%' ORDER BY CAST(SUBSTRING(event_id, 2) AS UNSIGNED) DESC LIMIT 1",
-      [],
-      (err, results) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        let nextNumber = 1;
-        if (results.length > 0) {
-          const lastEventId = results[0].event_id;
-          const lastNumber = parseInt(lastEventId.substring(1));
-          nextNumber = lastNumber + 1;
-        }
-
-        // Format as e001, e002, etc.
-        const newEventId = `e${nextNumber.toString().padStart(3, "0")}`;
-        resolve(newEventId);
-      }
+  try {
+    const [results] = await pool.query(
+      "SELECT event_id FROM events WHERE event_id LIKE 'e%' ORDER BY CAST(SUBSTRING(event_id, 2) AS UNSIGNED) DESC LIMIT 1"
     );
-  });
+
+    let nextNumber = 1;
+    if (results.length > 0) {
+      const lastEventId = results[0].event_id;
+      const lastNumber = parseInt(lastEventId.substring(1));
+      nextNumber = lastNumber + 1;
+    }
+
+    // Format as e001, e002, etc.
+    const newEventId = `e${nextNumber.toString().padStart(3, "0")}`;
+    return newEventId;
+  } catch (err) {
+    throw new Error(`Failed to generate event ID: ${err.message}`);
+  }
 };
 
 module.exports = {

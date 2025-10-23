@@ -2,7 +2,8 @@ const Event = require("../models/Event");
 
 exports.createEvent = async (req, res) => {
   try {
-    await Event.createEvent(req.body);
+    const coordinator_id = req.user.user_id; // Get from JWT token
+    await Event.createEvent({ ...req.body, coordinator_id });
     res.status(201).json({ message: "Event created." });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -14,7 +15,11 @@ exports.getEvents = async (req, res) => {
     const events = await Event.getEvents();
     res.json(events);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("=== Error in getEvents ===");
+    console.error("Error message:", err.message);
+    console.error("Error code:", err.code);
+    console.error("Error stack:", err.stack);
+    res.status(500).json({ error: err.message || "Unknown error occurred" });
   }
 };
 

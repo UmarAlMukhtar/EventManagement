@@ -1,7 +1,11 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const app = express();
-require("dotenv").config();
+
+// Load environment variables from .env file
+require("dotenv").config({ path: path.join(__dirname, ".env") });
+
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
@@ -17,6 +21,11 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Logging middleware
+app.use((req, res, next) => {
+  next();
+});
 
 // Welcome route
 app.get("/", async (req, res) => {
@@ -38,6 +47,20 @@ app.use("/api/registrations", registrationRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/auth", authRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err);
+  res
+    .status(err.status || 500)
+    .json({ error: err.message || "Internal Server Error" });
+});
+
+// 404 handler
+app.use((req, res) => {
+  console.warn(`404 Not Found: ${req.method} ${req.path}`);
+  res.status(404).json({ error: "Not Found" });
+});
 
 // Start server
 app.listen(3000, () => {

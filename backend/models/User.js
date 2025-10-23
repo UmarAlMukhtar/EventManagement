@@ -1,4 +1,4 @@
-const pool = require("./db").promise();
+const pool = require("./db");
 
 module.exports = {
   async getUsers() {
