@@ -1,21 +1,9 @@
 -- Event Management System Database Schema
--- This script initializes the database with all necessary tables
-
--- Create database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS event_management;
-
--- Use the event_management database
-USE event_management;
-
--- Drop existing tables if they exist (in reverse order of dependencies)
-DROP TABLE IF EXISTS feedback;
-DROP TABLE IF EXISTS attendance;
-DROP TABLE IF EXISTS registrations;
-DROP TABLE IF EXISTS events;
-DROP TABLE IF EXISTS users;
+-- Create/select your database before importing this file.
+-- Existing tables and records are preserved. No application tables are dropped.
 
 -- Create users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   user_id VARCHAR(10) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
@@ -26,7 +14,7 @@ CREATE TABLE users (
 );
 
 -- Create events table
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
   event_id VARCHAR(10) PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
   description TEXT,
@@ -39,7 +27,7 @@ CREATE TABLE events (
 );
 
 -- Create registrations table
-CREATE TABLE registrations (
+CREATE TABLE IF NOT EXISTS registrations (
   reg_id VARCHAR(10) PRIMARY KEY,
   event_id VARCHAR(10) NOT NULL,
   user_id VARCHAR(10) NOT NULL,
@@ -53,7 +41,7 @@ CREATE TABLE registrations (
 );
 
 -- Create attendance table
-CREATE TABLE attendance (
+CREATE TABLE IF NOT EXISTS attendance (
   att_id VARCHAR(10) PRIMARY KEY,
   reg_id VARCHAR(10) NOT NULL,
   status ENUM('present', 'absent', 'late') NOT NULL,
@@ -63,7 +51,7 @@ CREATE TABLE attendance (
 );
 
 -- Create feedback table
-CREATE TABLE feedback (
+CREATE TABLE IF NOT EXISTS feedback (
   fb_id VARCHAR(10) PRIMARY KEY,
   reg_id VARCHAR(10) NOT NULL,
   rating INT CHECK (rating >= 1 AND rating <= 5),
@@ -74,10 +62,10 @@ CREATE TABLE feedback (
 );
 
 -- Create indexes for better query performance
-CREATE INDEX idx_events_coordinator ON events(coordinator_id);
-CREATE INDEX idx_registrations_event ON registrations(event_id);
-CREATE INDEX idx_registrations_user ON registrations(user_id);
-CREATE INDEX idx_registrations_status ON registrations(status);
-CREATE INDEX idx_attendance_reg ON attendance(reg_id);
-CREATE INDEX idx_feedback_reg ON feedback(reg_id);
-CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_events_coordinator ON events(coordinator_id);
+CREATE INDEX IF NOT EXISTS idx_registrations_event ON registrations(event_id);
+CREATE INDEX IF NOT EXISTS idx_registrations_user ON registrations(user_id);
+CREATE INDEX IF NOT EXISTS idx_registrations_status ON registrations(status);
+CREATE INDEX IF NOT EXISTS idx_attendance_reg ON attendance(reg_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_reg ON feedback(reg_id);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);

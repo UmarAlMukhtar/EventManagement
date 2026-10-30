@@ -1,3 +1,5 @@
-node_modules/
 .env
-hashPassword.js
+target/
+*.log
+.idea/
+*.iml
